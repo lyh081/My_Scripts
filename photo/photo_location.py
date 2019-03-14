@@ -1,12 +1,20 @@
+# photo_rename_time.py
+# __author__ = 'Henry Liu'
+# __version__ = '1.0'
+
+"""
+This can analyze photo's GPS information
+and convert it to structured address by using Baidu Map API
+"""
+
 import exifread
-import re
 import json
 import requests
 
 
 def get_GPS_Info(image_path):
     """
-    获取图片的经纬度信息
+    Get the GPS (latitude and longitude) information of the image
     """
     GPS = {}
     date = ''
@@ -23,7 +31,7 @@ def get_GPS_Info(image_path):
 
 def convert(Lng_or_Lat):
     """
-    将解析得到的经纬度转换为十进制
+    Convert the latitude/longitude to decimal number
     """
     deg, min, sec = [x.replace(' ', '')
                      for x in str(Lng_or_Lat)[1:-1].split(',')]
@@ -33,21 +41,25 @@ def convert(Lng_or_Lat):
 
 def find_address_from_GPS(GPS):
     """
-    使用百度地图 API把经纬度坐标转换为结构化地址。
+    Convert decimal latitude/longitude to convert it to structured address by using Baidu Map API
     """
-    # 百度地图API秘钥，本秘钥来自互联网搜索，侵删（可自行申请）
+    # This secret_key was collected from internet, you can apply for a free one
     secret_key = '4IU3oIAMpZhfWZsMu7xzqBBAf6vMHcoa'
     if not GPS:
-        return '无GPS信息'
+        return "This photo dosn't GPS information."
     lat, lng = GPS['GPSLatitude'], GPS['GPSLongitude']
-    baidu_map_api = （"http://api.map.baidu.com/geocoder/v2/?ak={0}&callback=renderReverse&location={1},{2}s&output=json&pois=0".format(secret_key, lat, lng)）
+
+    baidu_map_api = "http://api.map.baidu.com/geocoder/v2/?ak={0}&callback=renderReverse&location={1},{2}s&output=json&pois=0".format(
+        secret_key, lat, lng)
     response = requests.get(baidu_map_api)
+
     content = response.text.replace("renderReverse&&renderReverse(", "")[:-1]
     baidu_map_addr = json.loads(content)
     address = {
         'formatted_address': baidu_map_addr["result"]["formatted_address"],
         'sematic_description': baidu_map_addr["result"]["sematic_description"],
     }
+
     return address
 
 

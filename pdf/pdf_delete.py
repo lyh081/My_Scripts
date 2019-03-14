@@ -1,7 +1,7 @@
 import os
 from PyPDF2 import PdfFileReader, PdfFileWriter
-base = os.getcwd()
 
+base = os.getcwd()
 
 def Delete_Page(file_path, page_number):
     old_file = open(file_path, 'rb')
